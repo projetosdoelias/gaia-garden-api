@@ -4,6 +4,8 @@
 /build
 src/generated
 
+.clinerules
+
 # Logs
 logs
 *.log

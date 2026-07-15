@@ -1,9 +1,7 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { PrismaClient, Prisma } from '../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { Pool, PoolConfig } from 'pg'; // Importe PoolConfig para ajudar na tipagem
-import * as parse from 'pg-connection-string';
-
-import { PrismaClient } from '../generated/prisma/client';
+import { Pool } from 'pg';
 
 @Injectable()
 export class PrismaService
@@ -11,23 +9,14 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   constructor() {
-    const connectionOptions = parse.parse(process.env.DATABASE_URL || '');
+    // 1. Cria a pool de conexões nativa do driver 'pg'
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
-    // CORREÇÃO AQUI: Montamos o objeto PoolConfig tratando os valores nulos
-    const poolConfig: PoolConfig = {
-      host: connectionOptions.host ?? undefined,
-      port: connectionOptions.port
-        ? parseInt(connectionOptions.port, 10)
-        : undefined,
-      user: connectionOptions.user ?? undefined,
-      password: connectionOptions.password ?? undefined,
-      database: connectionOptions.database ?? undefined, // Transforma null em undefined
-      ssl: connectionOptions.ssl ? (connectionOptions.ssl as any) : undefined,
-    };
-
-    const pool = new Pool(poolConfig);
+    // 2. Instancia o adaptador do Prisma para o PostgreSQL
     const adapter = new PrismaPg(pool);
-    super({ adapter });
+
+    // 3. Passa o adaptador obrigatorio para o construtor
+    super({ adapter } as Prisma.PrismaClientOptions);
   }
 
   async onModuleInit() {
