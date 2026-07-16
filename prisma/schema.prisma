@@ -1,7 +1,7 @@
 generator client {
-  provider        = "prisma-client"
-  output          = "../src/generated/prisma"
-  moduleFormat    = "cjs"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
@@ -9,8 +9,31 @@ datasource db {
 }
 
 model Habitat {
-  id        Int      @default(autoincrement()) @id
-  title     String
-  description   String?
+  id          Int     @id @default(autoincrement())
+  title       String
+  description String?
+
+  telemetry Telemetry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("habitats")
+}
+
+model Telemetry {
+  id Int @id @default(autoincrement())
+
+  habitatId Int
+  habitat   Habitat @relation(fields: [habitatId], references: [id])
+
+  recordedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  temperature Float
+  humidity    Float
+  vpd         Float
+
+  @@index([habitatId, recordedAt])
+  @@map("telemetries")
 }
