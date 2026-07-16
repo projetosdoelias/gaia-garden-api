@@ -5,6 +5,7 @@
 src/generated
 
 .clinerules
+.ARCHITECTURE.md
 
 # Logs
 logs
