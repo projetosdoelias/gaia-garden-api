@@ -2,7 +2,7 @@ import { IsString, IsOptional } from 'class-validator';
 
 export class CreateHabitatDto {
   @IsString()
-  title: string;
+  title!: string;
 
   @IsString()
   @IsOptional()
