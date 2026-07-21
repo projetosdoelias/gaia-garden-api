@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsDate } from 'class-validator';
+import { IsNumber, IsString, IsOptional } from 'class-validator';
+import { Matches } from 'class-validator';
 
 export class CreateTelemetryDto {
   @ApiProperty({
@@ -10,13 +11,18 @@ export class CreateTelemetryDto {
   habitatId!: number;
 
   @ApiProperty({
-    description: 'Data e hora da coleta da telemetria',
-    example: '2026-07-15T22:30:00.000Z',
+    description:
+      'Data e hora da coleta da telemetria (formato: YYYY-MM-DD HH:MM:SS)',
+    example: '2026-07-15 22:30:00',
     type: String,
-    format: 'date-time',
+    required: false,
   })
-  @IsDate()
-  recordedAt!: Date;
+  @IsString()
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/, {
+    message: 'recordedAt must be in format YYYY-MM-DD HH:MM:SS',
+  })
+  recordedAt?: Date;
 
   @ApiProperty({
     description: 'Temperatura medida em graus Celsius',
