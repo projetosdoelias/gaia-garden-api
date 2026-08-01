@@ -14,6 +14,7 @@ model Habitat {
   description String?
 
   telemetry Telemetry[]
+  apiKeys   ApiKey[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -36,4 +37,19 @@ model Telemetry {
 
   @@index([habitatId, recordedAt])
   @@map("telemetries")
+}
+
+model ApiKey {
+  id          Int      @id @default(autoincrement())
+  name        String
+  keyHash     String   @unique
+  isActive    Boolean  @default(true)
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  habitatId   Int
+  habitat     Habitat  @relation(fields: [habitatId], references: [id])
+
+  @@map("api_keys")
 }
