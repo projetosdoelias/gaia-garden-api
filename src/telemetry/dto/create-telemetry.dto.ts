@@ -48,5 +48,6 @@ export class CreateTelemetryDto {
     minimum: 0,
   })
   @IsNumber()
+  @IsOptional()
   vpd!: number;
 }
