@@ -6,9 +6,10 @@ import { PrismaModule } from './prisma/prisma.module';
 import { TelemetryModule } from './telemetry/telemetry.module';
 import { ApiKeyModule } from './api-key/api-key.module';
 import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
-  imports: [HabitatModule, PrismaModule, TelemetryModule, ApiKeyModule, AuthModule],
+  imports: [HabitatModule, PrismaModule, TelemetryModule, ApiKeyModule, AuthModule, UsersModule],
   controllers: [AppController],
   providers: [AppService],
 })
