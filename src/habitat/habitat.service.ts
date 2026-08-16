@@ -7,32 +7,42 @@ import { UpdateHabitatDto } from './dto/update-habitat.dto';
 export class HabitatService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createHabitatDto: CreateHabitatDto) {
+  async create(createHabitatDto: CreateHabitatDto & { userId: number }) {
     return this.prisma.habitat.create({
-      data: createHabitatDto,
+      data: {
+        title: createHabitatDto.title,
+        description: createHabitatDto.description,
+        user: {
+          connect: {
+            id: createHabitatDto.userId,
+          },
+        },
+      },
     });
   }
 
-  async findAll() {
-    return this.prisma.habitat.findMany();
-  }
-
-  async findOne(id: number) {
-    return this.prisma.habitat.findUnique({
-      where: { id },
+  async findAll(userId: number) {
+    return this.prisma.habitat.findMany({
+      where: { userId },
     });
   }
 
-  async update(id: number, updateHabitatDto: UpdateHabitatDto) {
-    return this.prisma.habitat.update({
-      where: { id },
+  async findOne(id: number, userId: number) {
+    return this.prisma.habitat.findFirst({
+      where: { id, userId },
+    });
+  }
+
+  async update(id: number, userId: number, updateHabitatDto: UpdateHabitatDto) {
+    return this.prisma.habitat.updateMany({
+      where: { id, userId },
       data: updateHabitatDto,
     });
   }
 
-  async remove(id: number) {
-    return this.prisma.habitat.delete({
-      where: { id },
+  async remove(id: number, userId: number) {
+    return this.prisma.habitat.deleteMany({
+      where: { id, userId },
     });
   }
 }

@@ -1,24 +1,49 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import * as bcrypt from 'bcrypt';
 
-// This should be a real class/interface representing a user entity
-export type User = any;
+interface User {
+  id: number;
+  username: string;
+  password: string;
+  confirmed: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+  userId?: number; // For backward compatibility
+}
 
 @Injectable()
 export class UsersService {
-  private readonly users = [
-    {
-      userId: 1,
-      username: 'elias',
-      password: 'senha',
-    },
-    {
-      userId: 2,
-      username: 'maria',
-      password: 'guess',
-    },
-  ];
+  constructor(private prisma: PrismaService) {}
 
-  async findOne(username: string): Promise<User | undefined> {
-    return this.users.find((user) => user.username === username);
+  async findOne(username: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { username },
+    });
+  }
+
+  async create(data: { username: string; password: string }): Promise<User> {
+    const existingUser = await this.findOne(data.username);
+    if (existingUser) {
+      throw new ConflictException('Username already exists');
+    }
+
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    return this.prisma.user.create({
+      data: {
+        username: data.username,
+        password: hashedPassword,
+        confirmed: false,
+      },
+    });
+  }
+
+  async validateUser(username: string, password: string): Promise<User | null> {
+    const user = await this.findOne(username);
+    if (!user) return null;
+
+    const isValid = await bcrypt.compare(password, user.password);
+    return isValid ? user : null;
   }
 }

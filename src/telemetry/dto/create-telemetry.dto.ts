@@ -6,9 +6,11 @@ export class CreateTelemetryDto {
   @ApiProperty({
     description: 'ID do habitat relacionado à telemetria',
     example: 1,
+    required: false,
   })
   @IsNumber()
-  habitatId!: number;
+  @IsOptional()
+  habitatId?: number;
 
   @ApiProperty({
     description:
