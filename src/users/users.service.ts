@@ -23,6 +23,12 @@ export class UsersService {
     });
   }
 
+  async findUserConfirmed(username: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { username, confirmed: true },
+    });
+  }
+
   async create(data: { username: string; password: string }): Promise<User> {
     const existingUser = await this.findOne(data.username);
     if (existingUser) {
@@ -40,7 +46,7 @@ export class UsersService {
   }
 
   async validateUser(username: string, password: string): Promise<User | null> {
-    const user = await this.findOne(username);
+    const user = await this.findUserConfirmed(username);
     if (!user) return null;
 
     const isValid = await bcrypt.compare(password, user.password);

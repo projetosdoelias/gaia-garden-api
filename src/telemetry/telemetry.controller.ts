@@ -12,6 +12,7 @@ import { TelemetryAuthGuard } from '../auth/guards/telemetry-auth.guard';
 import { TelemetryService } from './telemetry.service';
 import { CreateTelemetryDto } from './dto/create-telemetry.dto';
 import { ApiKeyGuard } from '../auth/guards/api-key.guard';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 
 @Controller('telemetry')
 export class TelemetryController {
@@ -34,12 +35,13 @@ export class TelemetryController {
   }
 
   @Get()
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(JwtGuard)
   findAll() {
     return this.telemetryService.findAll();
   }
 
   @Get(':id')
+  @UseGuards(JwtGuard)
   findOne(@Param('id') id: string) {
     return this.telemetryService.findOne(+id);
   }

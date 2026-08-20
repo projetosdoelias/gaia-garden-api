@@ -58,4 +58,9 @@ export class HabitatController {
   remove(@Req() req: UserRequest, @Param('id') id: string) {
     return this.habitatService.remove(+id, req.user.userId);
   }
+
+  @Get(':id/telemetry')
+  async findTelemetry(@Req() req: UserRequest, @Param('id') id: string) {
+    return this.habitatService.findTelemetryByHabitatId(+id, req.user.userId);
+  }
 }

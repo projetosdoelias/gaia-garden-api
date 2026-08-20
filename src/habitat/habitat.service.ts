@@ -45,4 +45,20 @@ export class HabitatService {
       where: { id, userId },
     });
   }
+
+  async findTelemetryByHabitatId(id: number, userId: number) {
+    const habitat = await this.prisma.habitat.findFirst({
+      where: { id, userId },
+    });
+
+    if (!habitat) {
+      //@todo throw an exception here instead of returning null, to indicate that the habitat was not found or does not belong to the user
+      return null;
+    }
+
+    return this.prisma.telemetry.findMany({
+      where: { habitatId: id },
+      orderBy: { recordedAt: 'desc' },
+    });
+  }
 }
