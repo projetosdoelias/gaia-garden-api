@@ -8,16 +8,28 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  confirmed Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  habitats  Habitat[]
+  @@map("users")
+}
+
 model Habitat {
   id          Int     @id @default(autoincrement())
   title       String
   description String?
-
-  telemetry Telemetry[]
-  apiKeys   ApiKey[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  userId      Int
+  user        User    @relation(fields: [userId], references: [id])
+  telemetry   Telemetry[]
+  apiKeys     ApiKey[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("habitats")
 }

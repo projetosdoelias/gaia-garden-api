@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTelemetryDto } from './dto/create-telemetry.dto';
 
@@ -23,6 +23,10 @@ export class TelemetryService {
   }
 
   async create(createTelemetryDto: CreateTelemetryDto) {
+    if (!createTelemetryDto.habitatId) {
+      throw new BadRequestException('habitatId is required');
+    }
+
     const vpd = this.calculateVPD(
       createTelemetryDto.temperature,
       createTelemetryDto.humidity,
@@ -31,6 +35,7 @@ export class TelemetryService {
     const data = {
       ...createTelemetryDto,
       vpd,
+      habitatId: createTelemetryDto.habitatId,
     };
 
     if (createTelemetryDto.recordedAt) {
@@ -49,6 +54,13 @@ export class TelemetryService {
   async findOne(id: number) {
     return this.prisma.telemetry.findUnique({
       where: { id },
+    });
+  }
+
+  async findLastByHabitatId(habitatId: number) {
+    return this.prisma.telemetry.findFirst({
+      where: { habitatId },
+      orderBy: { createdAt: 'desc' },
     });
   }
 }

@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -18,6 +19,7 @@ import { ApiKeyService } from './api-key.service';
 import { CreateApiKeyDto } from './dto/create-api-key.dto';
 import { ApiKeyResponseDto } from './dto/api-key-response.dto';
 import { ApiKeyListDto } from './dto/api-key-list.dto';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 
 @ApiTags('api-keys')
 @Controller('api-keys')
@@ -25,6 +27,7 @@ export class ApiKeyController {
   constructor(private readonly apiKeyService: ApiKeyService) {}
 
   @Get()
+  @UseGuards(JwtGuard)
   @ApiOkResponse({
     type: [ApiKeyListDto],
     description: 'List all API keys (without sensitive keyHash)',
@@ -51,6 +54,7 @@ export class ApiKeyController {
   }
 
   @Post()
+  @UseGuards(JwtGuard)
   @ApiCreatedResponse({
     type: ApiKeyResponseDto,
     description: 'Create a new API key (key is only shown once)',
@@ -83,6 +87,7 @@ export class ApiKeyController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtGuard)
   @ApiNoContentResponse({
     description: 'API key successfully deactivated',
   })
