@@ -56,4 +56,11 @@ export class TelemetryService {
       where: { id },
     });
   }
+
+  async findLastByHabitatId(habitatId: number) {
+    return this.prisma.telemetry.findFirst({
+      where: { habitatId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }
