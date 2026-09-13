@@ -49,5 +49,6 @@ ENV NODE_ENV=production
 
 EXPOSE 3000
 
+
 # Executa as migrações apontando para a pasta prisma antes de ligar a API
-CMD ["sh", "-c", "npx prisma migrate deploy --schema=./prisma/schema.prisma && npm run start:prod"]
+CMD ["sh", "-c", " npm run start:prod:lean"]
