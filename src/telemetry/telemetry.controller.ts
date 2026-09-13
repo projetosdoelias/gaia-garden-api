@@ -19,7 +19,6 @@ import { TelemetryAuthGuard } from '../auth/guards/telemetry-auth.guard';
 import { TelemetryService } from './telemetry.service';
 import { CreateTelemetryDto } from './dto/create-telemetry.dto';
 import { TelemetryLastResponseDto } from './dto/telemetry-last-response.dto';
-import { ApiKeyGuard } from '../auth/guards/api-key.guard';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
 @ApiTags('telemetry')

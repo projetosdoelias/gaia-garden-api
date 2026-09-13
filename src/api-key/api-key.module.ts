@@ -3,7 +3,6 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from '../prisma/prisma.module';
 import { ApiKeyService } from './api-key.service';
 import { ApiKeyController } from './api-key.controller';
-import { ApiKeyGuard } from '../auth/guards/api-key.guard';
 
 @Module({
   imports: [ConfigModule, PrismaModule],

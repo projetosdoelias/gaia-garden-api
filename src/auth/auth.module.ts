@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ApiKeyModule } from '../api-key/api-key.module';
-import { ApiKeyGuard } from './guards/api-key.guard';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UsersModule } from '../users/users.module';

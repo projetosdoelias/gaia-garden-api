@@ -23,6 +23,7 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 
 @ApiTags('api-keys')
 @Controller('api-keys')
+@UseGuards(JwtGuard)
 export class ApiKeyController {
   constructor(private readonly apiKeyService: ApiKeyService) {}
 
