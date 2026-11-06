@@ -7,9 +7,11 @@ import { TelemetryModule } from './telemetry/telemetry.module';
 import { ApiKeyModule } from './api-key/api-key.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { PlantsModule } from './plants/plants.module';
+import { EventsModule } from './events/events.module';
 
 @Module({
-  imports: [HabitatModule, PrismaModule, TelemetryModule, ApiKeyModule, AuthModule, UsersModule],
+  imports: [HabitatModule, PrismaModule, TelemetryModule, ApiKeyModule, AuthModule, UsersModule, PlantsModule, EventsModule],
   controllers: [AppController],
   providers: [AppService],
 })

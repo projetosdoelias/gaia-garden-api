@@ -45,10 +45,12 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 
+COPY --from=builder /app/prisma.config.ts ./
+
+
 ENV NODE_ENV=production
 
 EXPOSE 3000
 
 
-# Executa as migrações apontando para a pasta prisma antes de ligar a API
-CMD ["sh", "-c", " npm run start:prod:lean"]
+CMD ["npm", "run", "start:prod:lean"]
