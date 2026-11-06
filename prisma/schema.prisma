@@ -21,15 +21,17 @@ model User {
 }
 
 model Habitat {
-  id          Int     @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   title       String
   description String?
   userId      Int
-  user        User    @relation(fields: [userId], references: [id])
+  user        User       @relation(fields: [userId], references: [id])
   telemetry   Telemetry[]
   apiKeys     ApiKey[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  plants      Plant[]
+  events      Event[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   @@map("habitats")
 }
@@ -49,6 +51,40 @@ model Telemetry {
 
   @@index([habitatId, recordedAt])
   @@map("telemetries")
+}
+
+model Plant {
+  id           Int       @id @default(autoincrement())
+  name         String
+  description  String?
+  strain       String?
+  germinatedAt DateTime?
+  seedlingAt   DateTime?
+  vegetativeAt DateTime?
+  floweringAt  DateTime?
+
+  habitatId Int
+  habitat   Habitat @relation(fields: [habitatId], references: [id])
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
+
+  @@map("plants")
+}
+
+model Event {
+  id          Int       @id @default(autoincrement())
+  description String
+
+  habitatId Int
+  habitat   Habitat @relation(fields: [habitatId], references: [id])
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
+
+  @@map("events")
 }
 
 model ApiKey {
