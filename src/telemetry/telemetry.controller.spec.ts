@@ -24,6 +24,7 @@ describe('TelemetryController', () => {
           provide: TelemetryService,
           useValue: {
             create: jest.fn(),
+            createAuthorized: jest.fn(),
             findAll: jest.fn(),
             findOne: jest.fn(),
             findLastByHabitatId: jest.fn(),
@@ -54,55 +55,35 @@ describe('TelemetryController', () => {
   });
 
   describe('create', () => {
-    it('should create a telemetry record using habitatId from DTO when request has no apiKeyId', async () => {
-      const createTelemetryDto = {
-        habitatId: 1,
-        temperature: 25,
-        humidity: 60,
-      };
-      const req = mockRequest();
-      const expectedRecord = { id: 1, ...createTelemetryDto, vpd: 1.27 };
+    const dto = { habitatId: 1, temperature: 25, humidity: 60 };
 
-      jest.spyOn(service, 'create').mockResolvedValue(expectedRecord as any);
+    it('passes the API key habitat to the service (API key auth)', async () => {
+      jest
+        .spyOn(service, 'createAuthorized')
+        .mockResolvedValue({ id: 1 } as any);
 
-      const result = await controller.create(createTelemetryDto, req);
+      await controller.create(dto as any, mockRequest({ apiKeyId: 5 }));
 
-      expect(result).toEqual(expectedRecord);
-      expect(service.create).toHaveBeenCalledWith({
-        ...createTelemetryDto,
-        habitatId: 1,
+      expect(service.createAuthorized).toHaveBeenCalledWith(dto, {
+        apiKeyHabitatId: 5,
+        userId: undefined,
       });
     });
 
-    it('should use habitatId from request apiKeyId when present (API Key auth)', async () => {
-      const createTelemetryDto = {
-        temperature: 25,
-        humidity: 60,
-      };
-      const req = mockRequest({ apiKeyId: 5 });
-      const expectedRecord = { id: 1, ...createTelemetryDto, habitatId: 5, vpd: 1.27 };
+    it('passes userId from req.user to the service (JWT auth)', async () => {
+      jest
+        .spyOn(service, 'createAuthorized')
+        .mockResolvedValue({ id: 1 } as any);
 
-      jest.spyOn(service, 'create').mockResolvedValue(expectedRecord as any);
+      await controller.create(
+        dto as any,
+        mockRequest({ user: { userId: 7, username: 'u' } }),
+      );
 
-      const result = await controller.create(createTelemetryDto, req);
-
-      expect(result).toEqual(expectedRecord);
-      expect(service.create).toHaveBeenCalledWith({
-        ...createTelemetryDto,
-        habitatId: 5,
+      expect(service.createAuthorized).toHaveBeenCalledWith(dto, {
+        apiKeyHabitatId: undefined,
+        userId: 7,
       });
-    });
-
-    it('should throw BadRequestException when both request and DTO have no habitatId', async () => {
-      const createTelemetryDto = {
-        temperature: 25,
-        humidity: 60,
-      };
-      const req = mockRequest({ apiKeyId: undefined });
-
-      expect(() =>
-        controller.create(createTelemetryDto, req),
-      ).toThrow('habitatId is required');
     });
   });
 

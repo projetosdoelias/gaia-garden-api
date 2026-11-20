@@ -27,7 +27,9 @@ describe('AppController', () => {
 
   describe('health check', () => {
     it('should return "Everything OK" when database is reachable', async () => {
-      jest.mocked(prismaService.$queryRaw).mockResolvedValue([{ '?column?': 1 }]);
+      jest
+        .mocked(prismaService.$queryRaw)
+        .mockResolvedValue([{ '?column?': 1 }]);
 
       const result = await appController.getHealth();
       expect(result).toEqual({ status: 'Everything OK' });

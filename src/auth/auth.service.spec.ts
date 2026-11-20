@@ -49,9 +49,7 @@ describe('AuthService', () => {
 
   describe('signIn', () => {
     it('should return an access_token when credentials are valid', async () => {
-      jest
-        .spyOn(usersService, 'validateUser')
-        .mockResolvedValue(mockUser);
+      jest.spyOn(usersService, 'validateUser').mockResolvedValue(mockUser);
 
       const expectedToken = 'jwt.access.token';
       jest.spyOn(jwtService, 'signAsync').mockResolvedValue(expectedToken);
@@ -72,9 +70,9 @@ describe('AuthService', () => {
     it('should throw UnauthorizedException when user validation fails', async () => {
       jest.spyOn(usersService, 'validateUser').mockResolvedValue(null);
 
-      await expect(
-        service.signIn('testuser', 'wrongpassword'),
-      ).rejects.toThrow(UnauthorizedException);
+      await expect(service.signIn('testuser', 'wrongpassword')).rejects.toThrow(
+        UnauthorizedException,
+      );
 
       expect(jwtService.signAsync).not.toHaveBeenCalled();
     });
@@ -90,9 +88,9 @@ describe('AuthService', () => {
     it('should throw UnauthorizedException when user does not exist', async () => {
       jest.spyOn(usersService, 'validateUser').mockResolvedValue(null);
 
-      await expect(
-        service.signIn('nonexistent', 'password'),
-      ).rejects.toThrow(UnauthorizedException);
+      await expect(service.signIn('nonexistent', 'password')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });

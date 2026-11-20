@@ -17,6 +17,7 @@ async function bootstrap() {
     .setTitle('Gaia Garden API')
     .setDescription('IoT telemetry platform')
     .setVersion('1.0.0')
+    .addBearerAuth()
     .addApiKey(
       {
         type: 'apiKey',
