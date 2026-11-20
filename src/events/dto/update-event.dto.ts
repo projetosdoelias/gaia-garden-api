@@ -3,8 +3,8 @@ import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class UpdateEventDto {
   @ApiProperty({
-    description: 'Descrição do evento',
-    example: 'Adicionei fertilizante orgânico',
+    description: 'Event description',
+    example: 'I added organic fertilizer',
     required: false,
   })
   @IsString()

@@ -3,8 +3,8 @@ import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateEventDto {
   @ApiProperty({
-    description: 'Descrição do evento',
-    example: 'Adicionei fertilizante orgânico',
+    description: 'Event description',
+    example: 'I added organic fertilizer',
   })
   @IsString()
   @IsNotEmpty()

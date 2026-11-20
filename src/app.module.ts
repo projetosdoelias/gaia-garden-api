@@ -9,9 +9,20 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PlantsModule } from './plants/plants.module';
 import { EventsModule } from './events/events.module';
+import { PlantLogsModule } from './plant-logs/plant-logs.module';
 
 @Module({
-  imports: [HabitatModule, PrismaModule, TelemetryModule, ApiKeyModule, AuthModule, UsersModule, PlantsModule, EventsModule],
+  imports: [
+    HabitatModule,
+    PrismaModule,
+    TelemetryModule,
+    ApiKeyModule,
+    AuthModule,
+    UsersModule,
+    PlantsModule,
+    EventsModule,
+    PlantLogsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

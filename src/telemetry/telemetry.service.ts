@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTelemetryDto } from './dto/create-telemetry.dto';
 
@@ -45,6 +50,37 @@ export class TelemetryService {
     return this.prisma.telemetry.create({
       data,
     });
+  }
+
+  /**
+   * Resolves which habitat a reading belongs to and enforces access:
+   * - API key: habitatId always comes from the key (body value is ignored).
+   * - JWT: habitatId comes from the body and must belong to the user.
+   */
+  async createAuthorized(
+    dto: CreateTelemetryDto,
+    auth: { apiKeyHabitatId?: number; userId?: number },
+  ) {
+    if (auth.apiKeyHabitatId !== undefined) {
+      return this.create({ ...dto, habitatId: auth.apiKeyHabitatId });
+    }
+
+    if (auth.userId === undefined) {
+      throw new UnauthorizedException();
+    }
+    if (!dto.habitatId) {
+      throw new BadRequestException('habitatId is required');
+    }
+
+    const habitat = await this.prisma.habitat.findFirst({
+      where: { id: dto.habitatId, userId: auth.userId },
+      select: { id: true },
+    });
+    if (!habitat) {
+      throw new NotFoundException('Habitat not found');
+    }
+
+    return this.create(dto);
   }
 
   async findAll() {

@@ -36,7 +36,11 @@ export class PlantsService {
     }
   }
 
-  async create(habitatId: number, userId: number, createPlantDto: CreatePlantDto) {
+  async create(
+    habitatId: number,
+    userId: number,
+    createPlantDto: CreatePlantDto,
+  ) {
     await this.ensureHabitatAccess(userId, habitatId);
 
     const data = {

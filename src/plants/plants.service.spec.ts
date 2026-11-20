@@ -58,10 +58,12 @@ describe('PlantsService', () => {
         name: 'Tomato',
         description: 'A tomato plant',
       };
-      jest.spyOn(prisma.habitat, 'findFirst').mockResolvedValue(mockHabitat as any);
-      jest.spyOn(prisma.plant, 'create').mockResolvedValue(mockPlant as any);
+      jest
+        .spyOn(prisma.habitat, 'findFirst')
+        .mockResolvedValue(mockHabitat as any);
+      jest.spyOn(prisma.plant, 'create').mockResolvedValue(mockPlant);
 
-      const result = await service.create(1, 1, dto as any);
+      const result = await service.create(1, 1, dto);
 
       expect(result).toEqual(mockPlant);
       expect(prisma.habitat.findFirst).toHaveBeenCalledWith({
@@ -87,10 +89,12 @@ describe('PlantsService', () => {
         name: 'Tomato',
         germinatedAt: '2026-07-15T22:30:00.000Z',
       };
-      jest.spyOn(prisma.habitat, 'findFirst').mockResolvedValue(mockHabitat as any);
-      jest.spyOn(prisma.plant, 'create').mockResolvedValue(mockPlant as any);
+      jest
+        .spyOn(prisma.habitat, 'findFirst')
+        .mockResolvedValue(mockHabitat as any);
+      jest.spyOn(prisma.plant, 'create').mockResolvedValue(mockPlant);
 
-      await service.create(1, 1, dto as any);
+      await service.create(1, 1, dto);
 
       const createCall = (prisma.plant.create as jest.Mock).mock.calls[0][0];
       expect(createCall.data.germinatedAt).toEqual(
@@ -112,8 +116,10 @@ describe('PlantsService', () => {
   describe('findAll', () => {
     it('should return only non-deleted plants of the habitat', async () => {
       const activePlants = [mockPlant];
-      jest.spyOn(prisma.habitat, 'findFirst').mockResolvedValue(mockHabitat as any);
-      jest.spyOn(prisma.plant, 'findMany').mockResolvedValue(activePlants as any);
+      jest
+        .spyOn(prisma.habitat, 'findFirst')
+        .mockResolvedValue(mockHabitat as any);
+      jest.spyOn(prisma.plant, 'findMany').mockResolvedValue(activePlants);
 
       const result = await service.findAll(1, 1);
 
@@ -134,8 +140,10 @@ describe('PlantsService', () => {
 
   describe('findOne', () => {
     it('should return a specific plant when it belongs to the habitat', async () => {
-      jest.spyOn(prisma.habitat, 'findFirst').mockResolvedValue(mockHabitat as any);
-      jest.spyOn(prisma.plant, 'findFirst').mockResolvedValue(mockPlant as any);
+      jest
+        .spyOn(prisma.habitat, 'findFirst')
+        .mockResolvedValue(mockHabitat as any);
+      jest.spyOn(prisma.plant, 'findFirst').mockResolvedValue(mockPlant);
 
       const result = await service.findOne(1, 1, 1);
 
@@ -146,14 +154,20 @@ describe('PlantsService', () => {
     });
 
     it('should throw NotFoundException when plant belongs to another habitat', async () => {
-      jest.spyOn(prisma.habitat, 'findFirst').mockResolvedValue(mockHabitat as any);
+      jest
+        .spyOn(prisma.habitat, 'findFirst')
+        .mockResolvedValue(mockHabitat as any);
       jest.spyOn(prisma.plant, 'findFirst').mockResolvedValue(null);
 
-      await expect(service.findOne(1, 1, 99)).rejects.toThrow(NotFoundException);
+      await expect(service.findOne(1, 1, 99)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw NotFoundException when the plant is deleted', async () => {
-      jest.spyOn(prisma.habitat, 'findFirst').mockResolvedValue(mockHabitat as any);
+      jest
+        .spyOn(prisma.habitat, 'findFirst')
+        .mockResolvedValue(mockHabitat as any);
       jest.spyOn(prisma.plant, 'findFirst').mockResolvedValue(null);
 
       await expect(service.findOne(1, 1, 1)).rejects.toThrow(NotFoundException);
@@ -172,11 +186,13 @@ describe('PlantsService', () => {
       const dto = { name: 'Updated Tomato' };
       const updatedPlant = { ...mockPlant, name: 'Updated Tomato' };
 
-      jest.spyOn(prisma.habitat, 'findFirst').mockResolvedValue(mockHabitat as any);
-      jest.spyOn(prisma.plant, 'updateMany').mockResolvedValue({ count: 1 } as any);
-      jest.spyOn(prisma.plant, 'findFirst').mockResolvedValue(updatedPlant as any);
+      jest
+        .spyOn(prisma.habitat, 'findFirst')
+        .mockResolvedValue(mockHabitat as any);
+      jest.spyOn(prisma.plant, 'updateMany').mockResolvedValue({ count: 1 });
+      jest.spyOn(prisma.plant, 'findFirst').mockResolvedValue(updatedPlant);
 
-      const result = await service.update(1, 1, 1, dto as any);
+      const result = await service.update(1, 1, 1, dto);
 
       expect(result).toEqual(updatedPlant);
       expect(prisma.plant.updateMany).toHaveBeenCalledWith({
@@ -194,37 +210,43 @@ describe('PlantsService', () => {
     });
 
     it('should throw NotFoundException when the plant is already deleted', async () => {
-      jest.spyOn(prisma.habitat, 'findFirst').mockResolvedValue(mockHabitat as any);
-      jest.spyOn(prisma.plant, 'updateMany').mockResolvedValue({ count: 0 } as any);
+      jest
+        .spyOn(prisma.habitat, 'findFirst')
+        .mockResolvedValue(mockHabitat as any);
+      jest.spyOn(prisma.plant, 'updateMany').mockResolvedValue({ count: 0 });
 
-      await expect(service.update(1, 1, 1, { name: 'x' } as any)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.update(1, 1, 1, { name: 'x' } as any),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw NotFoundException when the plant belongs to another habitat', async () => {
-      jest.spyOn(prisma.habitat, 'findFirst').mockResolvedValue(mockHabitat as any);
-      jest.spyOn(prisma.plant, 'updateMany').mockResolvedValue({ count: 0 } as any);
+      jest
+        .spyOn(prisma.habitat, 'findFirst')
+        .mockResolvedValue(mockHabitat as any);
+      jest.spyOn(prisma.plant, 'updateMany').mockResolvedValue({ count: 0 });
 
-      await expect(service.update(1, 1, 99, { name: 'x' } as any)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.update(1, 1, 99, { name: 'x' } as any),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw NotFoundException when habitat belongs to another user', async () => {
       jest.spyOn(prisma.habitat, 'findFirst').mockResolvedValue(null);
 
-      await expect(service.update(1, 5, 1, { name: 'x' } as any)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.update(1, 5, 1, { name: 'x' } as any),
+      ).rejects.toThrow(NotFoundException);
       expect(prisma.plant.updateMany).not.toHaveBeenCalled();
     });
   });
 
   describe('remove', () => {
     it('should soft-delete a plant by setting deletedAt when it belongs to the habitat', async () => {
-      jest.spyOn(prisma.habitat, 'findFirst').mockResolvedValue(mockHabitat as any);
-      jest.spyOn(prisma.plant, 'updateMany').mockResolvedValue({ count: 1 } as any);
+      jest
+        .spyOn(prisma.habitat, 'findFirst')
+        .mockResolvedValue(mockHabitat as any);
+      jest.spyOn(prisma.plant, 'updateMany').mockResolvedValue({ count: 1 });
 
       const result = await service.remove(1, 1, 1);
 
@@ -236,15 +258,19 @@ describe('PlantsService', () => {
     });
 
     it('should throw NotFoundException when the plant is already deleted', async () => {
-      jest.spyOn(prisma.habitat, 'findFirst').mockResolvedValue(mockHabitat as any);
-      jest.spyOn(prisma.plant, 'updateMany').mockResolvedValue({ count: 0 } as any);
+      jest
+        .spyOn(prisma.habitat, 'findFirst')
+        .mockResolvedValue(mockHabitat as any);
+      jest.spyOn(prisma.plant, 'updateMany').mockResolvedValue({ count: 0 });
 
       await expect(service.remove(1, 1, 1)).rejects.toThrow(NotFoundException);
     });
 
     it('should throw NotFoundException when the plant belongs to another habitat', async () => {
-      jest.spyOn(prisma.habitat, 'findFirst').mockResolvedValue(mockHabitat as any);
-      jest.spyOn(prisma.plant, 'updateMany').mockResolvedValue({ count: 0 } as any);
+      jest
+        .spyOn(prisma.habitat, 'findFirst')
+        .mockResolvedValue(mockHabitat as any);
+      jest.spyOn(prisma.plant, 'updateMany').mockResolvedValue({ count: 0 });
 
       await expect(service.remove(1, 1, 99)).rejects.toThrow(NotFoundException);
     });

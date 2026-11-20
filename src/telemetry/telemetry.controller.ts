@@ -20,6 +20,12 @@ import { TelemetryService } from './telemetry.service';
 import { CreateTelemetryDto } from './dto/create-telemetry.dto';
 import { TelemetryLastResponseDto } from './dto/telemetry-last-response.dto';
 import { JwtGuard } from '../auth/guards/jwt.guard';
+import { Request } from 'express';
+
+interface TelemetryRequest extends Request {
+  apiKeyId?: number;
+  user?: { userId: number; username: string };
+}
 
 @ApiTags('telemetry')
 @Controller('telemetry')
@@ -28,17 +34,21 @@ export class TelemetryController {
 
   @Post()
   @UseGuards(TelemetryAuthGuard)
+  @ApiOperation({
+    summary: 'Record a telemetry reading',
+    description:
+      'With an API key, habitatId comes from the key. With a JWT, habitatId is required in the body and the habitat must belong to the user (404 otherwise).',
+  })
+  @ApiNotFoundResponse({
+    description: 'Habitat not found or not owned by the user (JWT only)',
+  })
   create(
     @Body() createTelemetryDto: CreateTelemetryDto,
-    @Req() request: Request,
+    @Req() request: TelemetryRequest,
   ) {
-    const habitatId = request['apiKeyId'] ?? createTelemetryDto.habitatId;
-    if (!habitatId) {
-      throw new BadRequestException('habitatId is required');
-    }
-    return this.telemetryService.create({
-      ...createTelemetryDto,
-      habitatId,
+    return this.telemetryService.createAuthorized(createTelemetryDto, {
+      apiKeyHabitatId: request.apiKeyId,
+      userId: request.user?.userId,
     });
   }
 

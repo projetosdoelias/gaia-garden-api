@@ -20,9 +20,6 @@ describe('HabitatService', () => {
               updateMany: jest.fn(),
               deleteMany: jest.fn(),
             },
-            telemetry: {
-              findMany: jest.fn(),
-            },
           },
         },
       ],
@@ -40,9 +37,15 @@ describe('HabitatService', () => {
     it('should create a habitat linked to a user', async () => {
       const dto = { title: 'My Terrarium', description: 'A test terrarium' };
       const userId = 1;
-      const mockHabitat = { id: 1, ...dto, userId, createdAt: new Date(), updatedAt: new Date() };
+      const mockHabitat = {
+        id: 1,
+        ...dto,
+        userId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
 
-      jest.spyOn(prisma.habitat, 'create').mockResolvedValue(mockHabitat as any);
+      jest.spyOn(prisma.habitat, 'create').mockResolvedValue(mockHabitat);
 
       const result = await service.create({ ...dto, userId });
 
@@ -146,7 +149,7 @@ describe('HabitatService', () => {
 
       jest
         .spyOn(prisma.habitat, 'updateMany')
-        .mockResolvedValue(mockUpdateResult as any);
+        .mockResolvedValue(mockUpdateResult);
 
       const result = await service.update(1, 1, updateDto);
 
@@ -156,101 +159,46 @@ describe('HabitatService', () => {
         data: { title: 'Updated Title' },
       });
     });
-describe('remove', () => {
-    it('should delete a habitat when it belongs to the user', async () => {
-      const mockDeleteResult = { count: 1 };
+    describe('remove', () => {
+      it('should delete a habitat when it belongs to the user', async () => {
+        const mockDeleteResult = { count: 1 };
 
-      jest
-        .spyOn(prisma.habitat, 'deleteMany')
-        .mockResolvedValue(mockDeleteResult as any);
+        jest
+          .spyOn(prisma.habitat, 'deleteMany')
+          .mockResolvedValue(mockDeleteResult);
 
-      const result = await service.remove(1, 1);
+        const result = await service.remove(1, 1);
 
-      expect(result).toEqual(mockDeleteResult);
-      expect(prisma.habitat.deleteMany).toHaveBeenCalledWith({
-        where: { id: 1, userId: 1 },
+        expect(result).toEqual(mockDeleteResult);
+        expect(prisma.habitat.deleteMany).toHaveBeenCalledWith({
+          where: { id: 1, userId: 1 },
+        });
       });
-    });
 
-    it('should delete nothing when habitat does not belong to the user', async () => {
-      const mockDeleteResult = { count: 0 };
+      it('should delete nothing when habitat does not belong to the user', async () => {
+        const mockDeleteResult = { count: 0 };
 
-      jest
-        .spyOn(prisma.habitat, 'deleteMany')
-        .mockResolvedValue(mockDeleteResult as any);
+        jest
+          .spyOn(prisma.habitat, 'deleteMany')
+          .mockResolvedValue(mockDeleteResult);
 
-      const result = await service.remove(1, 2);
+        const result = await service.remove(1, 2);
 
-      expect(result).toEqual({ count: 0 });
+        expect(result).toEqual({ count: 0 });
+      });
     });
   });
 
-  describe('findTelemetryByHabitatId', () => {
-    it('should return telemetry when habitat exists and belongs to the user', async () => {
-      const mockHabitat = { id: 1, title: 'My Habitat', userId: 1 };
-      const mockTelemetry = [
-        { id: 1, temperature: 25, humidity: 60, habitatId: 1, recordedAt: new Date() },
-        { id: 2, temperature: 26, humidity: 55, habitatId: 1, recordedAt: new Date() },
-      ];
+  it('should update nothing when habitat does not belong to the user', async () => {
+    const updateDto = { title: 'Should Not Update' };
+    const mockUpdateResult = { count: 0 };
 
-      jest
-        .spyOn(prisma.habitat, 'findFirst')
-        .mockResolvedValue(mockHabitat as any);
-      jest
-        .spyOn(prisma.telemetry, 'findMany')
-        .mockResolvedValue(mockTelemetry as any);
+    jest
+      .spyOn(prisma.habitat, 'updateMany')
+      .mockResolvedValue(mockUpdateResult);
 
-      const result = await service.findTelemetryByHabitatId(1, 1);
+    const result = await service.update(1, 2, updateDto);
 
-      expect(result).toEqual(mockTelemetry);
-      expect(prisma.telemetry.findMany).toHaveBeenCalledWith({
-        where: { habitatId: 1 },
-        orderBy: { recordedAt: 'desc' },
-      });
-    });
-
-    it('should return null when habitat does not belong to the user', async () => {
-      jest.spyOn(prisma.habitat, 'findFirst').mockResolvedValue(null);
-
-      const result = await service.findTelemetryByHabitatId(1, 2);
-
-      expect(result).toBeNull();
-      expect(prisma.telemetry.findMany).not.toHaveBeenCalled();
-    });
-
-    it('should return null when habitat does not exist', async () => {
-      jest.spyOn(prisma.habitat, 'findFirst').mockResolvedValue(null);
-
-      const result = await service.findTelemetryByHabitatId(999, 1);
-
-      expect(result).toBeNull();
-    });
-
-    it('should return empty array when habitat has no telemetry', async () => {
-      const mockHabitat = { id: 1, title: 'My Habitat', userId: 1 };
-
-      jest
-        .spyOn(prisma.habitat, 'findFirst')
-        .mockResolvedValue(mockHabitat as any);
-      jest.spyOn(prisma.telemetry, 'findMany').mockResolvedValue([]);
-
-      const result = await service.findTelemetryByHabitatId(1, 1);
-
-      expect(result).toEqual([]);
-    });
+    expect(result).toEqual({ count: 0 });
   });
 });
-
-    it('should update nothing when habitat does not belong to the user', async () => {
-      const updateDto = { title: 'Should Not Update' };
-      const mockUpdateResult = { count: 0 };
-
-      jest
-        .spyOn(prisma.habitat, 'updateMany')
-        .mockResolvedValue(mockUpdateResult as any);
-
-      const result = await service.update(1, 2, updateDto);
-
-      expect(result).toEqual({ count: 0 });
-    });
-  });

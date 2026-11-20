@@ -81,7 +81,8 @@ describe('ApiKeyService', () => {
 
       const result = await service.createApiKey(mockCreateApiKeyDto);
 
-      const createCallArgs = (prisma.apiKey.create as jest.Mock).mock.calls[0][0];
+      const createCallArgs = (prisma.apiKey.create as jest.Mock).mock
+        .calls[0][0];
       expect(createCallArgs.data.keyHash).not.toBe(result.apiKey);
       expect(createCallArgs.data.keyHash).toMatch(/^[a-f0-9]{64}$/);
     });

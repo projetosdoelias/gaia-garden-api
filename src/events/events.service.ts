@@ -18,7 +18,11 @@ export class EventsService {
     }
   }
 
-  async create(habitatId: number, userId: number, createEventDto: CreateEventDto) {
+  async create(
+    habitatId: number,
+    userId: number,
+    createEventDto: CreateEventDto,
+  ) {
     await this.ensureHabitatAccess(userId, habitatId);
 
     const data = {

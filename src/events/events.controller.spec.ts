@@ -8,14 +8,25 @@ describe('EventsController', () => {
   let controller: EventsController;
   let service: EventsService;
 
-  const mockRequest = (overrides) =>
-    ({ user: { userId: 1, username: 'testuser' }, ...overrides }) as any;
+  const mockRequest = (overrides) => ({
+    user: { userId: 1, username: 'testuser' },
+    ...overrides,
+  });
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       controllers: [EventsController],
       providers: [
-        { provide: EventsService, useValue: { create: jest.fn(), findAll: jest.fn(), findOne: jest.fn(), update: jest.fn(), remove: jest.fn() } },
+        {
+          provide: EventsService,
+          useValue: {
+            create: jest.fn(),
+            findAll: jest.fn(),
+            findOne: jest.fn(),
+            update: jest.fn(),
+            remove: jest.fn(),
+          },
+        },
         { provide: JwtService, useValue: { verifyAsync: jest.fn() } },
         JwtGuard,
       ],
@@ -24,39 +35,53 @@ describe('EventsController', () => {
     service = module.get(EventsService);
   });
 
-  it('should be defined', () => { expect(controller).toBeDefined(); });
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
 
   it('create should pass params to service', async () => {
     const dto = { description: 'Watering' };
-    jest.spyOn(service, 'create').mockResolvedValue({ id: 1, ...dto, habitatId: 1 } as any);
-    const result = await controller.create(mockRequest(), '1', dto as any);
+    jest
+      .spyOn(service, 'create')
+      .mockResolvedValue({ id: 1, ...dto, habitatId: 1 } as any);
+    const result = await controller.create(mockRequest(), '1', dto);
     expect(result).toEqual({ id: 1, ...dto, habitatId: 1 });
     expect(service.create).toHaveBeenCalledWith(1, 1, dto);
   });
 
   it('findAll should pass habitatId and userId', async () => {
-    jest.spyOn(service, 'findAll').mockResolvedValue([{ id: 1, description: 'Watering' }] as any);
+    jest
+      .spyOn(service, 'findAll')
+      .mockResolvedValue([{ id: 1, description: 'Watering' }] as any);
     const result = await controller.findAll(mockRequest(), '1');
     expect(result).toHaveLength(1);
     expect(service.findAll).toHaveBeenCalledWith(1, 1);
   });
 
   it('findOne should convert string params to numbers', async () => {
-    jest.spyOn(service, 'findOne').mockResolvedValue({ id: 1, description: 'Watering' } as any);
+    jest
+      .spyOn(service, 'findOne')
+      .mockResolvedValue({ id: 1, description: 'Watering' } as any);
     const result = await controller.findOne(mockRequest(), '1', '1');
     expect(result).toEqual({ id: 1, description: 'Watering' });
     expect(service.findOne).toHaveBeenCalledWith(1, 1, 1);
   });
 
   it('update should convert string params to numbers', async () => {
-    jest.spyOn(service, 'update').mockResolvedValue({ id: 1, description: 'Feeding' } as any);
-    const result = await controller.update(mockRequest(), '1', '1', { description: 'Feeding' } as any);
+    jest
+      .spyOn(service, 'update')
+      .mockResolvedValue({ id: 1, description: 'Feeding' } as any);
+    const result = await controller.update(mockRequest(), '1', '1', {
+      description: 'Feeding',
+    });
     expect(result).toEqual({ id: 1, description: 'Feeding' });
-    expect(service.update).toHaveBeenCalledWith(1, 1, 1, { description: 'Feeding' });
+    expect(service.update).toHaveBeenCalledWith(1, 1, 1, {
+      description: 'Feeding',
+    });
   });
 
   it('remove should convert string params to numbers', async () => {
-    jest.spyOn(service, 'remove').mockResolvedValue({ deleted: true } as any);
+    jest.spyOn(service, 'remove').mockResolvedValue({ deleted: true });
     const result = await controller.remove(mockRequest(), '1', '1');
     expect(result).toEqual({ deleted: true });
     expect(service.remove).toHaveBeenCalledWith(1, 1, 1);

@@ -66,11 +66,47 @@ model Plant {
   habitatId Int
   habitat   Habitat @relation(fields: [habitatId], references: [id])
 
+  logs PlantLog[]
+
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   deletedAt DateTime?
 
   @@map("plants")
+}
+
+enum PlantLogType {
+  OBSERVATION
+  WATERING
+  FEEDING
+  PRUNING
+  TRAINING
+  TRANSPLANT
+  STAGE_CHANGE
+  OTHER
+}
+
+model PlantLog {
+  id Int @id @default(autoincrement())
+
+  plantId Int
+  plant   Plant @relation(fields: [plantId], references: [id])
+
+  type        PlantLogType
+  notes       String?
+  /// 1-5, enforced by the plant_logs_healthScore_check CHECK constraint
+  healthScore Int?
+  /// Per-type payload (JSONB). Unused for OBSERVATION.
+  details     Json?
+  occurredAt  DateTime     @default(now())
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([plantId, occurredAt])
+  @@index([plantId, type, occurredAt])
+  @@map("plant_logs")
 }
 
 model Event {
