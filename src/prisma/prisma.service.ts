@@ -13,7 +13,7 @@ export class PrismaService
 
     const adapter = new PrismaPg(pool);
 
-    super({ adapter } as Prisma.PrismaClientOptions);
+    super({ adapter });
   }
 
   async onModuleInit() {

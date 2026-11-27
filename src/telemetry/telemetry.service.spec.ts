@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { TelemetryService } from './telemetry.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -14,6 +18,9 @@ describe('TelemetryService', () => {
         {
           provide: PrismaService,
           useValue: {
+            habitat: {
+              findFirst: jest.fn(),
+            },
             telemetry: {
               create: jest.fn(),
               findMany: jest.fn(),
@@ -51,9 +58,7 @@ describe('TelemetryService', () => {
         createdAt: new Date('2026-01-01T00:00:00.000Z'),
       };
 
-      jest
-        .spyOn(prisma.telemetry, 'create')
-        .mockResolvedValue(createdRecord);
+      jest.spyOn(prisma.telemetry, 'create').mockResolvedValue(createdRecord);
 
       const result = await service.create(validDto);
 
@@ -91,9 +96,9 @@ describe('TelemetryService', () => {
         humidity: 60,
       };
 
-      await expect(
-        service.create(dtoWithoutHabitat as any),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.create(dtoWithoutHabitat as any)).rejects.toThrow(
+        BadRequestException,
+      );
 
       expect(prisma.telemetry.create).not.toHaveBeenCalled();
     });
@@ -105,9 +110,9 @@ describe('TelemetryService', () => {
         humidity: 60,
       };
 
-      await expect(
-        service.create(dtoWithNullHabitat as any),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.create(dtoWithNullHabitat as any)).rejects.toThrow(
+        BadRequestException,
+      );
 
       expect(prisma.telemetry.create).not.toHaveBeenCalled();
     });
@@ -162,6 +167,66 @@ describe('TelemetryService', () => {
           .calls[0][0];
         expect(createCall.data.vpd).toBeCloseTo(0.68, 1);
       });
+    });
+  });
+
+  describe('createAuthorized', () => {
+    const dto = { habitatId: 1, temperature: 25, humidity: 60 };
+
+    beforeEach(() => {
+      jest.spyOn(prisma.telemetry, 'create').mockResolvedValue({} as any);
+    });
+
+    it('API key: uses the habitat from the key and ignores the body', async () => {
+      await service.createAuthorized({ ...dto, habitatId: 999 } as any, {
+        apiKeyHabitatId: 5,
+      });
+
+      expect(prisma.habitat.findFirst).not.toHaveBeenCalled();
+      expect(prisma.telemetry.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ habitatId: 5 }),
+      });
+    });
+
+    it('JWT: creates when the habitat belongs to the user', async () => {
+      jest
+        .spyOn(prisma.habitat, 'findFirst')
+        .mockResolvedValue({ id: 1 } as any);
+
+      await service.createAuthorized(dto as any, { userId: 7 });
+
+      expect(prisma.habitat.findFirst).toHaveBeenCalledWith({
+        where: { id: 1, userId: 7 },
+        select: { id: true },
+      });
+      expect(prisma.telemetry.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ habitatId: 1 }),
+      });
+    });
+
+    it("JWT: 404 and nothing written for another user's habitat", async () => {
+      jest.spyOn(prisma.habitat, 'findFirst').mockResolvedValue(null);
+
+      await expect(
+        service.createAuthorized(dto as any, { userId: 2 }),
+      ).rejects.toThrow(NotFoundException);
+      expect(prisma.telemetry.create).not.toHaveBeenCalled();
+    });
+
+    it('JWT: 400 when habitatId is missing', async () => {
+      await expect(
+        service.createAuthorized({ temperature: 25, humidity: 60 } as any, {
+          userId: 7,
+        }),
+      ).rejects.toThrow(BadRequestException);
+      expect(prisma.telemetry.create).not.toHaveBeenCalled();
+    });
+
+    it('401 when neither API key nor user is present', async () => {
+      await expect(service.createAuthorized(dto as any, {})).rejects.toThrow(
+        UnauthorizedException,
+      );
+      expect(prisma.telemetry.create).not.toHaveBeenCalled();
     });
   });
 

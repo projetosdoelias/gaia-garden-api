@@ -1,0 +1,50 @@
+name: Build and Push to GCP Artifact Registry
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Tag da imagem (ex: 0.0.1, latest)'
+        required: true
+        default: '0.0.1'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    # 💡 TRAVA EXTRA: O job só avança se o usuário que disparou for exatamente você
+    if: github.actor == 'SEU_USERNAME_DO_GITHUB_AQUI'
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Autentica no GCP usando Workload Identity Federation
+      - name: Google Auth
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      # Configura o Docker ocultando a região do registry externa
+      - name: Set up Cloud SDK & Docker Auth
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          registry: ${{ secrets.GCP_REGISTRY_HOST }}
+
+      # Faz o Build, Tag e Push sem expor strings ou caminhos no código
+      - name: Build and Push Docker Image
+        run: |
+          # Monta a URL da imagem usando puramente as variáveis ocultas que você configurou
+          IMAGE_BASE="${{ secrets.GCP_REGISTRY_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY_NAME }}/${{ secrets.GCP_IMAGE_NAME }}"
+          TAG="${{ github.event.inputs.image_tag }}"
+
+          # Realiza os mesmos passos que você executa localmente
+          docker build -t ${{ secrets.GCP_IMAGE_NAME }} .
+          docker tag ${{ secrets.GCP_IMAGE_NAME }} $IMAGE_BASE:$TAG
+          docker push $IMAGE_BASE:$TAG

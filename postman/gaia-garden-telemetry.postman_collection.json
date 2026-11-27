@@ -1,0 +1,782 @@
+{
+  "info": {
+    "name": "Gaia Garden – Habitat Telemetry",
+    "description": "Telemetry series (aggregated) and paginated list routes.\n\nUses environment variables `gg_url` and `jwt_token`. Collection variables: `habitat_id` (your habitat), `other_habitat_id` (a habitat you do NOT own, for the 404 test), `next_cursor` (filled automatically by the list requests).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "habitat_id",
+      "value": "1"
+    },
+    {
+      "key": "other_habitat_id",
+      "value": "9999"
+    },
+    {
+      "key": "next_cursor",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Series",
+      "item": [
+        {
+          "name": "Series – hourly, São Paulo (auto bucket)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('has series shape', () => {",
+                  "  pm.expect(body).to.have.keys('habitatId','metric','bucket','from','to','tz','points');",
+                  "  pm.expect(body.points).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gg_url}}/habitat/{{habitat_id}}/telemetry/series?from=2026-11-01T03:00:00Z&to=2026-11-02T03:00:00Z&tz=America/Sao_Paulo",
+              "host": [
+                "{{gg_url}}"
+              ],
+              "path": [
+                "habitat",
+                "{{habitat_id}}",
+                "telemetry",
+                "series"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-11-01T03:00:00Z",
+                  "description": "Range start, inclusive (ISO 8601 with offset)"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-11-02T03:00:00Z",
+                  "description": "Range end, exclusive. Max 90 days after from"
+                },
+                {
+                  "key": "tz",
+                  "value": "America/Sao_Paulo",
+                  "description": "IANA time zone. Default UTC"
+                }
+              ]
+            },
+            "description": "Range <= 48h, so bucket is picked as `hour`."
+          },
+          "response": []
+        },
+        {
+          "name": "Series – daily, all params",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('has series shape', () => {",
+                  "  pm.expect(body).to.have.keys('habitatId','metric','bucket','from','to','tz','points');",
+                  "  pm.expect(body.points).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gg_url}}/habitat/{{habitat_id}}/telemetry/series?from=2026-10-20T00:00:00Z&to=2026-11-19T00:00:00Z&bucket=day&metric=vpd&tz=America/Sao_Paulo",
+              "host": [
+                "{{gg_url}}"
+              ],
+              "path": [
+                "habitat",
+                "{{habitat_id}}",
+                "telemetry",
+                "series"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-10-20T00:00:00Z"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-11-19T00:00:00Z"
+                },
+                {
+                  "key": "bucket",
+                  "value": "day",
+                  "description": "hour | day. Default: hour if range <= 48h, else day"
+                },
+                {
+                  "key": "metric",
+                  "value": "vpd",
+                  "description": "Only vpd for now. Default vpd"
+                },
+                {
+                  "key": "tz",
+                  "value": "America/Sao_Paulo"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Series – UTC default, numeric offset dates",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('has series shape', () => {",
+                  "  pm.expect(body).to.have.keys('habitatId','metric','bucket','from','to','tz','points');",
+                  "  pm.expect(body.points).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gg_url}}/habitat/{{habitat_id}}/telemetry/series?from=2026-11-01T00:00:00-03:00&to=2026-11-02T00:00:00-03:00",
+              "host": [
+                "{{gg_url}}"
+              ],
+              "path": [
+                "habitat",
+                "{{habitat_id}}",
+                "telemetry",
+                "series"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-11-01T00:00:00-03:00"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-11-02T00:00:00-03:00"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "List (cursor pagination)",
+      "item": [
+        {
+          "name": "List – first page",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('has page shape', () => pm.expect(body).to.have.keys('data','nextCursor'));",
+                  "pm.collectionVariables.set('next_cursor', body.nextCursor ?? '');",
+                  "console.log('next_cursor =', body.nextCursor);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gg_url}}/habitat/{{habitat_id}}/telemetry?limit=50&from=2026-11-18T00:00:00Z&to=2026-11-19T00:00:00Z",
+              "host": [
+                "{{gg_url}}"
+              ],
+              "path": [
+                "habitat",
+                "{{habitat_id}}",
+                "telemetry"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "1–200. Default 50"
+                },
+                {
+                  "key": "from",
+                  "value": "2026-11-18T00:00:00Z",
+                  "description": "Optional filter, inclusive",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "2026-11-19T00:00:00Z",
+                  "description": "Optional filter, exclusive",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Saves `nextCursor` into the `next_cursor` collection variable. Enable `from`/`to` to filter."
+          },
+          "response": []
+        },
+        {
+          "name": "List – next page",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('has page shape', () => pm.expect(body).to.have.keys('data','nextCursor'));",
+                  "pm.collectionVariables.set('next_cursor', body.nextCursor ?? '');",
+                  "console.log('next_cursor =', body.nextCursor);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gg_url}}/habitat/{{habitat_id}}/telemetry?limit=50&cursor={{next_cursor}}",
+              "host": [
+                "{{gg_url}}"
+              ],
+              "path": [
+                "habitat",
+                "{{habitat_id}}",
+                "telemetry"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "cursor",
+                  "value": "{{next_cursor}}",
+                  "description": "Value of nextCursor from the previous page"
+                }
+              ]
+            },
+            "description": "Run \"List – first page\" first. Run this repeatedly to walk pages; stops when nextCursor is null."
+          },
+          "response": []
+        },
+        {
+          "name": "List – date range filter",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('has page shape', () => pm.expect(body).to.have.keys('data','nextCursor'));",
+                  "pm.collectionVariables.set('next_cursor', body.nextCursor ?? '');",
+                  "console.log('next_cursor =', body.nextCursor);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gg_url}}/habitat/{{habitat_id}}/telemetry?limit=100&from=2026-11-18T00:00:00Z&to=2026-11-19T00:00:00Z",
+              "host": [
+                "{{gg_url}}"
+              ],
+              "path": [
+                "habitat",
+                "{{habitat_id}}",
+                "telemetry"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "100"
+                },
+                {
+                  "key": "from",
+                  "value": "2026-11-18T00:00:00Z"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-11-19T00:00:00Z"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Errors (expected failures)",
+      "item": [
+        {
+          "name": "401 – no token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gg_url}}/habitat/{{habitat_id}}/telemetry/series?from=2026-11-01T00:00:00Z&to=2026-11-02T00:00:00Z",
+              "host": [
+                "{{gg_url}}"
+              ],
+              "path": [
+                "habitat",
+                "{{habitat_id}}",
+                "telemetry",
+                "series"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-11-01T00:00:00Z"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-11-02T00:00:00Z"
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "401 – API key only (not accepted)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "gg_live_0123456789abcdef0123456789abcdef"
+              }
+            ],
+            "url": {
+              "raw": "{{gg_url}}/habitat/{{habitat_id}}/telemetry/series?from=2026-11-01T00:00:00Z&to=2026-11-02T00:00:00Z",
+              "host": [
+                "{{gg_url}}"
+              ],
+              "path": [
+                "habitat",
+                "{{habitat_id}}",
+                "telemetry",
+                "series"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-11-01T00:00:00Z"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-11-02T00:00:00Z"
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "404 – habitat not owned",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gg_url}}/habitat/{{other_habitat_id}}/telemetry/series?from=2026-11-01T00:00:00Z&to=2026-11-02T00:00:00Z",
+              "host": [
+                "{{gg_url}}"
+              ],
+              "path": [
+                "habitat",
+                "{{other_habitat_id}}",
+                "telemetry",
+                "series"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-11-01T00:00:00Z"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-11-02T00:00:00Z"
+                }
+              ]
+            },
+            "description": "Set `other_habitat_id` to a habitat that belongs to another user (or does not exist)."
+          },
+          "response": []
+        },
+        {
+          "name": "400 – range over 90 days",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gg_url}}/habitat/{{habitat_id}}/telemetry/series?from=2026-01-01T00:00:00Z&to=2026-06-01T00:00:00Z",
+              "host": [
+                "{{gg_url}}"
+              ],
+              "path": [
+                "habitat",
+                "{{habitat_id}}",
+                "telemetry",
+                "series"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-01-01T00:00:00Z"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-06-01T00:00:00Z"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "400 – from after to",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gg_url}}/habitat/{{habitat_id}}/telemetry/series?from=2026-11-02T00:00:00Z&to=2026-11-01T00:00:00Z",
+              "host": [
+                "{{gg_url}}"
+              ],
+              "path": [
+                "habitat",
+                "{{habitat_id}}",
+                "telemetry",
+                "series"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-11-02T00:00:00Z"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-11-01T00:00:00Z"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "400 – invalid bucket / metric / tz",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gg_url}}/habitat/{{habitat_id}}/telemetry/series?from=2026-11-01T00:00:00Z&to=2026-11-02T00:00:00Z&bucket=week&metric=temperature&tz=Mars/Base",
+              "host": [
+                "{{gg_url}}"
+              ],
+              "path": [
+                "habitat",
+                "{{habitat_id}}",
+                "telemetry",
+                "series"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-11-01T00:00:00Z"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-11-02T00:00:00Z"
+                },
+                {
+                  "key": "bucket",
+                  "value": "week"
+                },
+                {
+                  "key": "metric",
+                  "value": "temperature"
+                },
+                {
+                  "key": "tz",
+                  "value": "Mars/Base"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "400 – date without offset",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gg_url}}/habitat/{{habitat_id}}/telemetry/series?from=2026-11-01T00:00:00&to=2026-11-02T00:00:00",
+              "host": [
+                "{{gg_url}}"
+              ],
+              "path": [
+                "habitat",
+                "{{habitat_id}}",
+                "telemetry",
+                "series"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-11-01T00:00:00"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-11-02T00:00:00"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "400 – limit out of range",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gg_url}}/habitat/{{habitat_id}}/telemetry?limit=500",
+              "host": [
+                "{{gg_url}}"
+              ],
+              "path": [
+                "habitat",
+                "{{habitat_id}}",
+                "telemetry"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "500"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "400 – invalid cursor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gg_url}}/habitat/{{habitat_id}}/telemetry?cursor=garbage",
+              "host": [
+                "{{gg_url}}"
+              ],
+              "path": [
+                "habitat",
+                "{{habitat_id}}",
+                "telemetry"
+              ],
+              "query": [
+                {
+                  "key": "cursor",
+                  "value": "garbage"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "400 – non-numeric habitatId",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{gg_url}}/habitat/abc/telemetry",
+              "host": [
+                "{{gg_url}}"
+              ],
+              "path": [
+                "habitat",
+                "abc",
+                "telemetry"
+              ],
+              "query": []
+            },
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
